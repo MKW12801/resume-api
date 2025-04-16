@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Resume Project Backend (Lambda + API + DynamoDB)
+
+Globals:
+  Function:
+    Timeout: 5
+    Runtime: python3.9
+
+Resources:
+  VisitorCounterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: hello_world.app.lambda_handler
+      CodeUri: hello_world/
+      Description: Lambda to handle visitor count
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AmazonDynamoDBFullAccess
+      Events:
+        VisitorAPI:
+          Type: Api
+          Properties:
+            Path: /visitor
+            Method: get
+      Environment:
+        Variables:
+          TABLE_NAME: VisitorCounterTable
+
+  VisitorCounterTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: VisitorCounter
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
